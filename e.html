@@ -2,8 +2,13 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Magic 8-Ball צבעוני</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 8-Ball רספונסיבי</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #1a1a2e;
@@ -11,47 +16,50 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
             color: white;
+            overflow-x: hidden;
         }
 
-        /* עיצוב הכדור */
+        /* עיצוב הכדור - גודל גמיש לפי המסך */
         .eight-ball {
-            width: 320px;
-            height: 320px;
+            width: 80vw;
+            height: 80vw;
+            max-width: 350px;
+            max-height: 350px;
             background-color: #000;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: inset -25px -25px 60px rgba(255,255,255,0.1), 15px 15px 40px rgba(0,0,0,0.7);
-            margin-bottom: 30px;
+            box-shadow: inset -20px -20px 60px rgba(255,255,255,0.1), 10px 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         /* החלון הפנימי */
         .window {
-            width: 170px;
-            height: 170px;
+            width: 55%;
+            height: 55%;
             background: radial-gradient(circle, #0f3460 0%, #000 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 10px solid #16213e;
+            border: 8px solid #16213e;
             text-align: center;
-            padding: 15px;
+            padding: 10px;
         }
 
-        /* הטקסט של התשובה */
         #answer-text {
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: clamp(0.9rem, 4vw, 1.2rem); /* גודל טקסט משתנה */
             opacity: 0;
-            transition: opacity 0.8s ease-in, color 0.3s;
-            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+            transition: opacity 0.6s ease-in;
         }
 
         /* אנימציית רעידה */
@@ -65,51 +73,59 @@
         }
 
         .shaking {
-            animation: shake 0.4s;
+            animation: shake 0.4s ease-in-out;
             animation-iteration-count: 2;
         }
 
-        /* ממשק קלט */
+        /* ממשק קלט רספונסיבי */
         .controls {
+            width: 100%;
+            max-width: 400px;
             text-align: center;
             background: rgba(255, 255, 255, 0.05);
-            padding: 25px;
+            padding: 20px;
             border-radius: 20px;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
         }
 
         input {
-            padding: 12px 20px;
-            border-radius: 25px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 30px;
             border: none;
-            width: 260px;
             margin-bottom: 15px;
             outline: none;
             font-size: 1rem;
+            text-align: center;
         }
 
         button {
-            padding: 12px 30px;
-            border-radius: 25px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 30px;
             border: none;
             background: linear-gradient(45deg, #e94560, #950740);
             color: white;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        button:active {
+            transform: scale(0.98);
+        }
+
+        h2 {
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
 
-    <div class="eight-ball" id="ball">
+    <div class="eight-ball" id="ball" onclick="askMagicBall()">
         <div class="window">
             <div id="answer-text">8</div>
         </div>
@@ -117,36 +133,21 @@
 
     <div class="controls">
         <h2>שאל את כדור הקסם</h2>
-        <input type="text" id="user-input" placeholder="האם אצליח במבחן?">
+        <input type="text" id="user-input" value="האם אהיה מתכנת תותח?">
         <br>
-        <button onclick="askMagicBall()">גלה לי את העתיד!</button>
+        <button onclick="askMagicBall()">גלה לי!</button>
     </div>
 
     <script>
         function getRandomFortune() {
             const categories = [
-                { 
-                    type: "positive", 
-                    color: "#2ecc71", // ירוק
-                    answers: ["זה בטוח", "בהחלט כן", "בוודאות", "ללא ספק"] 
-                },
-                { 
-                    type: "negative", 
-                    color: "#e74c3c", // אדום
-                    answers: ["אל תבנה על זה", "ממש לא", "הסיכויים קלושים", "לא סביר"] 
-                },
-                { 
-                    type: "neutral", 
-                    color: "#f1c40f", // צהוב
-                    answers: ["נסה שוב", "שאל מאוחר יותר", "לא בטוח כרגע", "אולי"] 
-                }
+                { color: "#2ecc71", answers: ["זה בטוח", "בהחלט כן", "בוודאות", "ללא ספק"] },
+                { color: "#e74c3c", answers: ["אל תבנה על זה", "ממש לא", "הסיכויים קלושים", "לא סביר"] },
+                { color: "#f1c40f", answers: ["נסה שוב", "שאל מאוחר יותר", "אולי", "לא בטוח"] }
             ];
 
-            // בוחר קטגוריה אקראית
             const category = categories[Math.floor(Math.random() * categories.length)];
-            // בוחר תשובה אקראית מתוך הקטגוריה
             const text = category.answers[Math.floor(Math.random() * category.answers.length)];
-            
             return { text, color: category.color };
         }
 
@@ -155,31 +156,28 @@
             const answerDisplay = document.getElementById('answer-text');
             const inputField = document.getElementById('user-input');
 
-            if (inputField.value.trim() === "") {
-                alert("בבקשה תכתוב שאלה קודם!");
-                return;
+            // אם השדה ריק, נשתמש בשאלה שהייתה שם או בברירת מחדל
+            let question = inputField.value.trim();
+            if (question === "") {
+                question = "האם אהיה מתכנת תותח?";
+                inputField.value = question;
             }
 
-            // איפוס והפעלת רעידה
+            // אנימציה ואיפוס
             answerDisplay.style.opacity = "0";
             ball.classList.remove('shaking');
-            void ball.offsetWidth; // טריק קטן לריענון האנימציה
+            void ball.offsetWidth; // Force reflow
             ball.classList.add('shaking');
 
             setTimeout(() => {
                 const fortune = getRandomFortune();
-                
-                // עדכון טקסט וצבע
                 answerDisplay.textContent = fortune.text;
                 answerDisplay.style.color = fortune.color;
                 answerDisplay.style.opacity = "1";
-                
-                // ניקוי הקלט
-                inputField.value = "";
             }, 800);
         }
 
-        // מאפשר ללחוץ על Enter כדי לשאול
+        // תמיכה ב-Enter
         document.getElementById('user-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 askMagicBall();
@@ -189,4 +187,4 @@
 
 </body>
 </html>
-
+ 
