@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Magic 8-Ball צבעוני</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+        }
+
+        /* עיצוב הכדור */
+        .eight-ball {
+            width: 320px;
+            height: 320px;
+            background-color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset -25px -25px 60px rgba(255,255,255,0.1), 15px 15px 40px rgba(0,0,0,0.7);
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+
+        /* החלון הפנימי */
+        .window {
+            width: 170px;
+            height: 170px;
+            background: radial-gradient(circle, #0f3460 0%, #000 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 10px solid #16213e;
+            text-align: center;
+            padding: 15px;
+        }
+
+        /* הטקסט של התשובה */
+        #answer-text {
+            font-weight: bold;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.8s ease-in, color 0.3s;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        /* אנימציית רעידה */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(2deg); }
+            40% { transform: translate(3px, 2px) rotate(-2deg); }
+            60% { transform: translate(-3px, 1px) rotate(1deg); }
+            80% { transform: translate(-1px, -1px) rotate(-1deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
+
+        .shaking {
+            animation: shake 0.4s;
+            animation-iteration-count: 2;
+        }
+
+        /* ממשק קלט */
+        .controls {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        input {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            width: 260px;
+            margin-bottom: 15px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(45deg, #e94560, #950740);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="eight-ball" id="ball">
+        <div class="window">
+            <div id="answer-text">8</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <h2>שאל את כדור הקסם</h2>
+        <input type="text" id="user-input" placeholder="האם אצליח במבחן?">
+        <br>
+        <button onclick="askMagicBall()">גלה לי את העתיד!</button>
+    </div>
+
+    <script>
+        function getRandomFortune() {
+            const categories = [
+                { 
+                    type: "positive", 
+                    color: "#2ecc71", // ירוק
+                    answers: ["זה בטוח", "בהחלט כן", "בוודאות", "ללא ספק"] 
+                },
+                { 
+                    type: "negative", 
+                    color: "#e74c3c", // אדום
+                    answers: ["אל תבנה על זה", "ממש לא", "הסיכויים קלושים", "לא סביר"] 
+                },
+                { 
+                    type: "neutral", 
+                    color: "#f1c40f", // צהוב
+                    answers: ["נסה שוב", "שאל מאוחר יותר", "לא בטוח כרגע", "אולי"] 
+                }
+            ];
+
+            // בוחר קטגוריה אקראית
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            // בוחר תשובה אקראית מתוך הקטגוריה
+            const text = category.answers[Math.floor(Math.random() * category.answers.length)];
+            
+            return { text, color: category.color };
+        }
+
+        function askMagicBall() {
+            const ball = document.getElementById('ball');
+            const answerDisplay = document.getElementById('answer-text');
+            const inputField = document.getElementById('user-input');
+
+            if (inputField.value.trim() === "") {
+                alert("בבקשה תכתוב שאלה קודם!");
+                return;
+            }
+
+            // איפוס והפעלת רעידה
+            answerDisplay.style.opacity = "0";
+            ball.classList.remove('shaking');
+            void ball.offsetWidth; // טריק קטן לריענון האנימציה
+            ball.classList.add('shaking');
+
+            setTimeout(() => {
+                const fortune = getRandomFortune();
+                
+                // עדכון טקסט וצבע
+                answerDisplay.textContent = fortune.text;
+                answerDisplay.style.color = fortune.color;
+                answerDisplay.style.opacity = "1";
+                
+                // ניקוי הקלט
+                inputField.value = "";
+            }, 800);
+        }
+
+        // מאפשר ללחוץ על Enter כדי לשאול
+        document.getElementById('user-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                askMagicBall();
+            }
+        });
+    </script>
+
+</body>
+</html>
+
